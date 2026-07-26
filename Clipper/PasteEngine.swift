@@ -45,13 +45,15 @@ final class PasteEngine {
             pb.setData(data, forType: .png)
         }
 
-        // Re-activate the target app, then post ⌘V
+        // Re-activate the target app, then optionally post ⌘V
         guard let app = targetApp else { return }
         app.activate(options: [])
 
-        // Small delay so the app has focus before the key event lands
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) {
-            Self.postCmdV()
+        if ClipperPreferences.shared.pasteAutomatically {
+            // Small delay so the app has focus before the key event lands
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) {
+                Self.postCmdV()
+            }
         }
     }
 

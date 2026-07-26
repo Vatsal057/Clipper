@@ -7,6 +7,7 @@ import SwiftUI
 struct ClipperPanel: View {
 
     // MARK: Dependencies
+    @ObservedObject private var prefs = ClipperPreferences.shared
     @State private var store: ClipboardStore  // @Observable — no @ObservedObject needed
     let onPaste: (ClipboardItem) -> Void
     let onClose: () -> Void
@@ -111,10 +112,10 @@ struct ClipperPanel: View {
         }
         .frame(width: panelWidth, height: panelHeight)
         .background(
-            VisualEffectView(material: .popover, blendingMode: .behindWindow)
+            VisualEffectView(material: .menu, blendingMode: .behindWindow)
                 .ignoresSafeArea()
         )
-        .preferredColorScheme(.dark)
+        .preferredColorScheme(colorScheme)
         .sheet(isPresented: $showSettings) {
             SettingsPanel()
         }
@@ -206,7 +207,7 @@ struct ClipperPanel: View {
 
     private var footer: some View {
         HStack {
-            Text("⌘⇧C")
+            Text(formatHotkey(keyCode: prefs.hotkeyCode, modifiers: prefs.hotkeyModifiers))
                 .font(.system(size: 10, design: .monospaced))
                 .foregroundStyle(.quaternary)
 
@@ -233,6 +234,35 @@ struct ClipperPanel: View {
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 8)
+    }
+
+    private var colorScheme: ColorScheme? {
+        switch prefs.appearance {
+        case "Light": return .light
+        case "Dark":  return .dark
+        default:      return nil
+        }
+    }
+    
+    private func formatHotkey(keyCode: Int, modifiers: UInt64) -> String {
+        var str = ""
+        let flags = CGEventFlags(rawValue: modifiers)
+        if flags.contains(.maskControl) { str += "⌃" }
+        if flags.contains(.maskAlternate) { str += "⌥" }
+        if flags.contains(.maskShift) { str += "⇧" }
+        if flags.contains(.maskCommand) { str += "⌘" }
+        
+        let map: [Int: String] = [
+            0:"A", 1:"S", 2:"D", 3:"F", 4:"H", 5:"G", 6:"Z", 7:"X", 8:"C", 9:"V", 11:"B", 12:"Q", 13:"W", 14:"E", 15:"R", 16:"Y", 17:"T", 31:"O", 32:"U", 34:"I", 35:"P", 37:"L", 38:"J", 40:"K", 45:"N", 46:"M",
+            18:"1", 19:"2", 20:"3", 21:"4", 23:"5", 22:"6", 26:"7", 28:"8", 25:"9", 29:"0", 53:"Esc", 49:"Space"
+        ]
+        
+        if let keyStr = map[keyCode] {
+            str += keyStr
+        } else {
+            str += String(format: "%02X", keyCode)
+        }
+        return str
     }
 }
 

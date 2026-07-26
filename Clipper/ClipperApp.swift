@@ -89,16 +89,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func handleKeyEvent(_ event: CGEvent) -> Unmanaged<CGEvent>? {
-        // ⌘⇧C: keyCode 8 = C
-        let relevant: CGEventFlags = [.maskCommand, .maskShift]
+        let prefs = ClipperPreferences.shared
+        let hotkeyCode = Int64(prefs.hotkeyCode)
+        let relevant = CGEventFlags(rawValue: prefs.hotkeyModifiers)
+        
         let flags = event.flags.intersection([.maskCommand, .maskShift, .maskAlternate, .maskControl])
-        guard event.getIntegerValueField(.keyboardEventKeycode) == 8,
+        guard event.getIntegerValueField(.keyboardEventKeycode) == hotkeyCode,
               flags == relevant
         else {
             return Unmanaged.passRetained(event)
         }
-
-        NSLog("[Clipper] handleKeyEvent intercepted ⌘⇧C!")
 
         // Capture mouse position before dispatching to main
         let mousePos = NSEvent.mouseLocation

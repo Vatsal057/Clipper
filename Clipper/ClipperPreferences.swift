@@ -14,6 +14,11 @@ final class ClipperPreferences: ObservableObject {
         case launchAtLogin      = "launchAtLogin"
         case soundOnCopy        = "soundOnCopy"
         case maxHistoryCount    = "maxHistoryCount"
+        case hotkeyCode         = "hotkeyCode"
+        case hotkeyModifiers    = "hotkeyModifiers"
+        case appearance         = "appearance"
+        case showAppIcons       = "showAppIcons"
+        case pasteAutomatically = "pasteAutomatically"
     }
 
     // MARK: - Exposed settings (published for SwiftUI bindings)
@@ -30,6 +35,26 @@ final class ClipperPreferences: ObservableObject {
         didSet { save(.maxHistoryCount, maxHistoryCount) }
     }
 
+    @Published var hotkeyCode: Int {
+        didSet { save(.hotkeyCode, hotkeyCode) }
+    }
+
+    @Published var hotkeyModifiers: UInt64 {
+        didSet { save(.hotkeyModifiers, hotkeyModifiers) }
+    }
+
+    @Published var appearance: String {
+        didSet { save(.appearance, appearance) }
+    }
+
+    @Published var showAppIcons: Bool {
+        didSet { save(.showAppIcons, showAppIcons) }
+    }
+
+    @Published var pasteAutomatically: Bool {
+        didSet { save(.pasteAutomatically, pasteAutomatically) }
+    }
+
     // MARK: - Init
 
     private init() {
@@ -39,6 +64,22 @@ final class ClipperPreferences: ObservableObject {
                                ? true
                                : d.bool(forKey: Key.soundOnCopy.rawValue)
         maxHistoryCount    = { let v = d.integer(forKey: Key.maxHistoryCount.rawValue); return v == 0 ? 100 : v }()
+        
+        hotkeyCode         = { let v = d.integer(forKey: Key.hotkeyCode.rawValue); return v == 0 ? 8 : v }() // 8 = 'C'
+        hotkeyModifiers    = { 
+            let v = d.object(forKey: Key.hotkeyModifiers.rawValue) as? UInt64
+            return v ?? (CGEventFlags.maskCommand.rawValue | CGEventFlags.maskShift.rawValue)
+        }()
+        
+        appearance         = d.string(forKey: Key.appearance.rawValue) ?? "System"
+        
+        showAppIcons       = d.object(forKey: Key.showAppIcons.rawValue) == nil
+                               ? true
+                               : d.bool(forKey: Key.showAppIcons.rawValue)
+                               
+        pasteAutomatically = d.object(forKey: Key.pasteAutomatically.rawValue) == nil
+                               ? true
+                               : d.bool(forKey: Key.pasteAutomatically.rawValue)
     }
 
     // MARK: - Private
