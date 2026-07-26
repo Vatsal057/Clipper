@@ -4,6 +4,17 @@ All notable changes to Clipper are documented here.
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 Versioning: [SemVer](https://semver.org/).
 
+## [2.1.0] — 2026-07-26
+
+### Added
+- **Keyboard Navigation** — use up/down arrows to select an item and press Enter to paste immediately.
+- **Quit Button** — easily exit the app from the settings menu.
+
+### Fixed
+- **CPU Spike** — Fixed an issue where closing the floating panel left phantom event monitors running, which spiked CPU usage to 23% over time.
+- **Privacy Filters** — Automatically filters password manager copy events (like 1Password, Bitwarden, KeePassXC) and Microsoft Office metadata from history.
+- **Paste Robustness** — Suppresses local keyboard events momentarily while injecting `⌘V` to prevent race conditions if you type quickly while pasting.
+
 ## [2.0.0] — 2026-07-26
 
 ### Added

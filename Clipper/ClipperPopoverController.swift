@@ -16,6 +16,7 @@ final class ClipperPopoverController: NSObject, NSPopoverDelegate {
     // MARK: State
     private var popover:     NSPopover?
     private var cursorPanel: NSPanel?   // used for cursor-positioned display
+    private var globalEventMonitor: Any?
     private(set) var previousApp: NSRunningApplication?
 
     // MARK: Init
@@ -74,7 +75,7 @@ final class ClipperPopoverController: NSObject, NSPopoverDelegate {
             backing:     .buffered,
             defer:       false
         )
-        panel.isReleasedWhenClosed = false
+        panel.isReleasedWhenClosed = true
         panel.level                = .popUpMenu
         panel.backgroundColor      = .clear
         panel.isOpaque             = false
@@ -87,10 +88,8 @@ final class ClipperPopoverController: NSObject, NSPopoverDelegate {
         panel.contentView = hc.view
 
         // Dismiss on click-outside via a monitor
-        var monitor: Any?
-        monitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self, weak panel] _ in
+        globalEventMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] _ in
             self?.closeCursorPanel()
-            if let m = monitor { NSEvent.removeMonitor(m) }
         }
 
         panel.orderFrontRegardless()
@@ -109,6 +108,10 @@ final class ClipperPopoverController: NSObject, NSPopoverDelegate {
     }
 
     private func closeCursorPanel() {
+        if let m = globalEventMonitor {
+            NSEvent.removeMonitor(m)
+            globalEventMonitor = nil
+        }
         cursorPanel?.close()
         cursorPanel = nil
     }

@@ -14,6 +14,8 @@ struct ClipperPanel: View {
     @State private var searchText        = ""
     @State private var showClearConfirm  = false
     @State private var showSettings      = false
+    @State private var selectedIndex: Int = 0
+    @State private var eventMonitor: Any?
 
     // MARK: Design
     private let panelWidth:  CGFloat = 340
@@ -37,6 +39,16 @@ struct ClipperPanel: View {
             }
         }
     }
+    
+    private func clampSelection() {
+        if filtered.isEmpty {
+            selectedIndex = 0
+        } else if selectedIndex >= filtered.count {
+            selectedIndex = filtered.count - 1
+        } else if selectedIndex < 0 {
+            selectedIndex = 0
+        }
+    }
 
     // MARK: - Body
 
@@ -53,9 +65,10 @@ struct ClipperPanel: View {
             } else {
                 ScrollView {
                     LazyVStack(spacing: 0) {
-                        ForEach(filtered) { item in
+                        ForEach(Array(filtered.enumerated()), id: \.element.id) { index, item in
                             ClipItemRow(
                                 item: item,
+                                isSelected:  index == selectedIndex,
                                 onTap:       { onPaste(item) },
                                 onDelete:    { store.delete(id: item.id) },
                                 onTogglePin: { store.togglePin(id: item.id) }
@@ -85,6 +98,42 @@ struct ClipperPanel: View {
         .preferredColorScheme(.dark)
         .sheet(isPresented: $showSettings) {
             SettingsPanel()
+        }
+        .onChange(of: searchText) { _, _ in
+            selectedIndex = 0 // Reset selection on search
+        }
+        .onAppear {
+            setupEventMonitor()
+        }
+        .onDisappear {
+            if let monitor = eventMonitor {
+                NSEvent.removeMonitor(monitor)
+                eventMonitor = nil
+            }
+        }
+    }
+
+    private func setupEventMonitor() {
+        eventMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
+            switch event.keyCode {
+            case 125: // Down arrow
+                if selectedIndex < filtered.count - 1 {
+                    selectedIndex += 1
+                }
+                return nil // Consume event
+            case 126: // Up arrow
+                if selectedIndex > 0 {
+                    selectedIndex -= 1
+                }
+                return nil
+            case 36, 76: // Return / Enter
+                if !filtered.isEmpty, selectedIndex >= 0, selectedIndex < filtered.count {
+                    onPaste(filtered[selectedIndex])
+                }
+                return nil
+            default:
+                return event
+            }
         }
     }
 

@@ -67,6 +67,26 @@ struct SettingsPanel: View {
                         .padding(.horizontal, 12)
                         .padding(.vertical, 8)
                     }
+
+                    settingsGroup("App") {
+                        Button(action: {
+                            NSApplication.shared.terminate(nil)
+                        }) {
+                            HStack(spacing: 8) {
+                                Image(systemName: "power")
+                                    .foregroundStyle(.red)
+                                    .frame(width: 20)
+                                Text("Quit Clipper")
+                                    .font(.system(size: 12))
+                                    .foregroundStyle(.red)
+                                Spacer()
+                            }
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 8)
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                    }
                 }
                 .padding(.vertical, 8)
             }

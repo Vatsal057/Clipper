@@ -7,6 +7,7 @@ import AppKit
 struct ClipItemRow: View {
 
     let item: ClipboardItem
+    let isSelected:  Bool
     let onTap:       () -> Void
     let onDelete:    () -> Void
     let onTogglePin: () -> Void
@@ -130,9 +131,13 @@ struct ClipItemRow: View {
 
     @ViewBuilder
     private var rowBackground: some View {
-        if hovered {
+        if hovered || isSelected {
             RoundedRectangle(cornerRadius: 8, style: .continuous)
-                .fill(Color(nsColor: .controlAccentColor).opacity(0.15))
+                .fill(Color(nsColor: .controlAccentColor).opacity(isSelected ? 0.3 : 0.15))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8, style: .continuous)
+                        .strokeBorder(Color(nsColor: .controlAccentColor).opacity(isSelected ? 0.8 : 0), lineWidth: 1)
+                )
         } else {
             Color.clear
         }

@@ -16,14 +16,14 @@ proj_path = File.join(ROOT, "#{APP_NAME}.xcodeproj")
 FileUtils.rm_rf(proj_path)
 project = Xcodeproj::Project.new(proj_path)
 
-BUILD_VERSION = '3'  # static — changing this resets TCC Accessibility grant
+BUILD_VERSION = '4'  # static — changing this resets TCC Accessibility grant
 
 def common(bc, extra = {})
   s = bc.build_settings
   s['MACOSX_DEPLOYMENT_TARGET'] = DEPLOY
   s['SWIFT_VERSION']            = '5.0'
   s['CODE_SIGN_STYLE']          = 'Automatic'
-  s['MARKETING_VERSION']        = '2.0'
+  s['MARKETING_VERSION']        = '2.1.0'
   s['CURRENT_PROJECT_VERSION']  = BUILD_VERSION
   s['GENERATE_INFOPLIST_FILE']  = 'NO'    # hand-crafted Info.plist
   s['INFOPLIST_FILE']           = 'Clipper/Info.plist'

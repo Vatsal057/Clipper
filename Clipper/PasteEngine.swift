@@ -62,13 +62,21 @@ final class PasteEngine {
             requestAccessibilityIfNeeded()
             return
         }
-        let src = CGEventSource(stateID: .hidSystemState)
+        
+        let src = CGEventSource(stateID: .combinedSessionState)
+        // Disable local keyboard events momentarily while we inject ⌘V.
+        // This prevents a keystroke race if the user is typing fast while the popup closes.
+        src?.setLocalEventsFilterDuringSuppressionState(
+            [.permitLocalMouseEvents, .permitSystemDefinedEvents],
+            state: .eventSuppressionStateSuppressionInterval
+        )
+        
         // keyCode 9 = V
         let keyDown = CGEvent(keyboardEventSource: src, virtualKey: 0x09, keyDown: true)
         let keyUp   = CGEvent(keyboardEventSource: src, virtualKey: 0x09, keyDown: false)
         keyDown?.flags = .maskCommand
         keyUp?.flags   = .maskCommand
-        keyDown?.post(tap: .cghidEventTap)
-        keyUp?.post(tap: .cghidEventTap)
+        keyDown?.post(tap: .cgSessionEventTap)
+        keyUp?.post(tap: .cgSessionEventTap)
     }
 }
