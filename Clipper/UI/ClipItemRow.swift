@@ -89,10 +89,18 @@ struct ClipItemRow: View {
         switch item.content {
         case .text(let s):
             Text(s)
-        case .image:
-            Label("Image", systemImage: "photo")
-                .font(.system(size: 12))
-                .foregroundStyle(.secondary)
+        case .image(let data):
+            if let img = NSImage(data: data) {
+                Image(nsImage: img)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(maxHeight: 40)
+                    .cornerRadius(4)
+            } else {
+                Label("Image", systemImage: "photo")
+                    .font(.system(size: 12))
+                    .foregroundStyle(.secondary)
+            }
         }
     }
 

@@ -9,6 +9,7 @@ struct ClipperPanel: View {
     // MARK: Dependencies
     @State private var store: ClipboardStore  // @Observable — no @ObservedObject needed
     let onPaste: (ClipboardItem) -> Void
+    let onClose: () -> Void
 
     // MARK: Local state
     @State private var searchText        = ""
@@ -22,9 +23,10 @@ struct ClipperPanel: View {
     private let panelHeight: CGFloat = 500
 
     // MARK: Init
-    init(store: ClipboardStore, onPaste: @escaping (ClipboardItem) -> Void) {
+    init(store: ClipboardStore, onPaste: @escaping (ClipboardItem) -> Void, onClose: @escaping () -> Void) {
         self._store  = State(initialValue: store)
         self.onPaste = onPaste
+        self.onClose = onClose
     }
 
     // MARK: - Filtered items
@@ -64,24 +66,33 @@ struct ClipperPanel: View {
                 emptyState
             } else {
                 ScrollView {
-                    LazyVStack(spacing: 0) {
-                        ForEach(Array(filtered.enumerated()), id: \.element.id) { index, item in
-                            ClipItemRow(
-                                item: item,
-                                isSelected:  index == selectedIndex,
-                                onTap:       { onPaste(item) },
-                                onDelete:    { store.delete(id: item.id) },
-                                onTogglePin: { store.togglePin(id: item.id) }
-                            )
+                    ScrollViewReader { proxy in
+                        LazyVStack(spacing: 0) {
+                            ForEach(Array(filtered.enumerated()), id: \.element.id) { index, item in
+                                ClipItemRow(
+                                    item: item,
+                                    isSelected:  index == selectedIndex,
+                                    onTap:       { onPaste(item) },
+                                    onDelete:    { store.delete(id: item.id) },
+                                    onTogglePin: { store.togglePin(id: item.id) }
+                                )
+                                .id(item.id)
 
-                            if item.id != filtered.last?.id {
-                                Divider()
-                                    .padding(.horizontal, 12)
-                                    .opacity(0.2)
+                                if item.id != filtered.last?.id {
+                                    Divider()
+                                        .padding(.horizontal, 12)
+                                        .opacity(0.2)
+                                }
+                            }
+                        }
+                        .padding(.vertical, 4)
+                        .onChange(of: selectedIndex) { _, newIndex in
+                            guard newIndex >= 0, newIndex < filtered.count else { return }
+                            withAnimation(.easeInOut(duration: 0.1)) {
+                                proxy.scrollTo(filtered[newIndex].id, anchor: .center)
                             }
                         }
                     }
-                    .padding(.vertical, 4)
                 }
             }
 
@@ -115,7 +126,26 @@ struct ClipperPanel: View {
 
     private func setupEventMonitor() {
         eventMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
+            // Quick Paste: ⌘1 to ⌘9
+            if event.modifierFlags.contains(.command) && !event.modifierFlags.contains(.shift) && !event.modifierFlags.contains(.control) && !event.modifierFlags.contains(.option) {
+                switch event.keyCode {
+                case 18: if 0 < filtered.count { onPaste(filtered[0]); return nil }
+                case 19: if 1 < filtered.count { onPaste(filtered[1]); return nil }
+                case 20: if 2 < filtered.count { onPaste(filtered[2]); return nil }
+                case 21: if 3 < filtered.count { onPaste(filtered[3]); return nil }
+                case 23: if 4 < filtered.count { onPaste(filtered[4]); return nil }
+                case 22: if 5 < filtered.count { onPaste(filtered[5]); return nil }
+                case 26: if 6 < filtered.count { onPaste(filtered[6]); return nil }
+                case 28: if 7 < filtered.count { onPaste(filtered[7]); return nil }
+                case 25: if 8 < filtered.count { onPaste(filtered[8]); return nil }
+                default: break
+                }
+            }
+
             switch event.keyCode {
+            case 53: // Esc
+                onClose()
+                return nil
             case 125: // Down arrow
                 if selectedIndex < filtered.count - 1 {
                     selectedIndex += 1

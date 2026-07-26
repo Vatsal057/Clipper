@@ -14,7 +14,6 @@ final class ClipperPreferences: ObservableObject {
         case launchAtLogin      = "launchAtLogin"
         case soundOnCopy        = "soundOnCopy"
         case maxHistoryCount    = "maxHistoryCount"
-        case pasteWithoutFormat = "pasteWithoutFormat"
     }
 
     // MARK: - Exposed settings (published for SwiftUI bindings)
@@ -31,11 +30,6 @@ final class ClipperPreferences: ObservableObject {
         didSet { save(.maxHistoryCount, maxHistoryCount) }
     }
 
-    /// When true, pasting strips rich-text formatting and pastes plain text only.
-    @Published var pasteWithoutFormat: Bool {
-        didSet { save(.pasteWithoutFormat, pasteWithoutFormat) }
-    }
-
     // MARK: - Init
 
     private init() {
@@ -45,7 +39,6 @@ final class ClipperPreferences: ObservableObject {
                                ? true
                                : d.bool(forKey: Key.soundOnCopy.rawValue)
         maxHistoryCount    = { let v = d.integer(forKey: Key.maxHistoryCount.rawValue); return v == 0 ? 100 : v }()
-        pasteWithoutFormat = d.bool(forKey: Key.pasteWithoutFormat.rawValue)
     }
 
     // MARK: - Private

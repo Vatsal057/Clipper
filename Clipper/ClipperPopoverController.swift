@@ -117,11 +117,17 @@ final class ClipperPopoverController: NSObject, NSPopoverDelegate {
     }
 
     private func makePanel() -> ClipperPanel {
-        ClipperPanel(store: store) { [weak self] item in
-            guard let self else { return }
-            self.close()
-            self.engine.paste(item: item, into: self.previousApp)
-        }
+        ClipperPanel(
+            store: store,
+            onPaste: { [weak self] item in
+                guard let self else { return }
+                self.close()
+                self.engine.paste(item: item, into: self.previousApp)
+            },
+            onClose: { [weak self] in
+                self?.close()
+            }
+        )
     }
 
     // MARK: - NSPopoverDelegate

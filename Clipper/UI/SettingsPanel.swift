@@ -35,9 +35,6 @@ struct SettingsPanel: View {
                                icon: "power", note: nil)
                         toggle("Sound on copy", isOn: $prefs.soundOnCopy,
                                icon: "speaker.wave.2", note: nil)
-                        toggle("Paste plain text only", isOn: $prefs.pasteWithoutFormat,
-                               icon: "doc.plaintext",
-                               note: "Strips formatting when pasting")
                     }
 
                     settingsGroup("History") {
