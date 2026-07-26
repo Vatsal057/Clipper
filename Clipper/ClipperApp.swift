@@ -42,13 +42,24 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             button.image?.isTemplate = true
             button.action = #selector(statusIconClicked)
             button.target = self
+            button.sendAction(on: [.leftMouseUp, .rightMouseUp])
         }
     }
 
     @objc private func statusIconClicked() {
-        guard let button = statusItem?.button else { return }
-        // Status-bar click always anchors to the icon
-        popoverCtrl.toggleAtStatusBar(button: button)
+        guard let button = statusItem?.button, let event = NSApp.currentEvent else { return }
+        
+        if event.type == .rightMouseUp {
+            let menu = NSMenu()
+            let quitItem = NSMenuItem(title: "Quit Clipper", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
+            quitItem.target = NSApp
+            menu.addItem(quitItem)
+            
+            menu.popUp(positioning: nil, at: NSPoint(x: 0, y: button.bounds.height + 4), in: button)
+        } else {
+            // Left click
+            popoverCtrl.toggleAtStatusBar(button: button)
+        }
     }
 
     // MARK: - Global hotkey (⌘⇧C)
