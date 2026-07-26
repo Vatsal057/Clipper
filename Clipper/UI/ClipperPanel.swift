@@ -19,8 +19,8 @@ struct ClipperPanel: View {
     @State private var eventMonitor: Any?
 
     // MARK: Design
-    private let panelWidth:  CGFloat = 340
-    private let panelHeight: CGFloat = 500
+    private let panelWidth:  CGFloat = 380
+    private let panelHeight: CGFloat = 560
 
     // MARK: Init
     init(store: ClipboardStore, onPaste: @escaping (ClipboardItem) -> Void, onClose: @escaping () -> Void) {
@@ -57,7 +57,14 @@ struct ClipperPanel: View {
     var body: some View {
         VStack(spacing: 0) {
             // Header
-            header
+            SearchBar(
+                text: $searchText,
+                itemCount: store.items.count,
+                onSettings: { showSettings = true }
+            )
+            .padding(.horizontal, 16)
+            .padding(.top, 16)
+            .padding(.bottom, 8)
 
             Divider().opacity(0.3)
 
@@ -71,6 +78,7 @@ struct ClipperPanel: View {
                             ForEach(Array(filtered.enumerated()), id: \.element.id) { index, item in
                                 ClipItemRow(
                                     item: item,
+                                    index: index,
                                     isSelected:  index == selectedIndex,
                                     onTap:       { onPaste(item) },
                                     onDelete:    { store.delete(id: item.id) },
@@ -169,40 +177,7 @@ struct ClipperPanel: View {
 
     // MARK: - Header
 
-    private var header: some View {
-        VStack(spacing: 8) {
-            HStack {
-                Text("Clipper")
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundStyle(.primary)
-                Spacer()
-                // Item count badge
-                Text("\(store.items.count)")
-                    .font(.system(size: 10, design: .monospaced))
-                    .foregroundStyle(.quaternary)
-                    .padding(.horizontal, 5)
-                    .padding(.vertical, 2)
-                    .background(
-                        Capsule()
-                            .fill(Color.primary.opacity(0.06))
-                    )
-
-                // Settings gear
-                Button { showSettings = true } label: {
-                    Image(systemName: "gearshape")
-                        .font(.system(size: 12))
-                        .foregroundStyle(.tertiary)
-                }
-                .buttonStyle(.plain)
-                .help("Settings")
-            }
-
-            SearchBar(text: $searchText)
-        }
-        .padding(.horizontal, 12)
-        .padding(.top, 12)
-        .padding(.bottom, 8)
-    }
+    // Removed header function in favor of direct SearchBar usage
 
     // MARK: - Empty state
 

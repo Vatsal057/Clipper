@@ -7,6 +7,7 @@ import AppKit
 struct ClipItemRow: View {
 
     let item: ClipboardItem
+    let index: Int
     let isSelected:  Bool
     let onTap:       () -> Void
     let onDelete:    () -> Void
@@ -16,51 +17,52 @@ struct ClipItemRow: View {
 
     // MARK: Design tokens
     private let accentColor   = Color(hue: 0.13, saturation: 0.85, brightness: 0.95)  // warm amber
-    private let rowHeight: CGFloat = 52
+    private let rowHeight: CGFloat = 60
 
     var body: some View {
         Button(action: onTap) {
-            HStack(spacing: 10) {
+            HStack(spacing: 14) {
                 // App icon
                 appIconView
-                    .frame(width: 20, height: 20)
-                    .clipShape(RoundedRectangle(cornerRadius: 4, style: .continuous))
+                    .frame(width: 28, height: 28)
+                    .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+                    .shadow(color: .black.opacity(0.2), radius: 2, y: 1)
 
                 // Content preview
-                VStack(alignment: .leading, spacing: 2) {
+                VStack(alignment: .leading, spacing: 4) {
                     previewText
                         .lineLimit(2)
                         .multilineTextAlignment(.leading)
-                        .font(.system(size: 12, design: .monospaced))
-                        .foregroundStyle(hovered ? Color.primary : Color.primary.opacity(0.9))
+                        .font(.system(size: 13, weight: .regular))
+                        .foregroundStyle(Color.primary)
 
-                    HStack(spacing: 4) {
+                    HStack(spacing: 6) {
                         if let name = item.appName {
                             Text(name)
-                                .font(.system(size: 10))
+                                .font(.system(size: 11, weight: .medium))
                                 .foregroundStyle(.tertiary)
                         }
                         Text("·")
-                            .font(.system(size: 10))
+                            .font(.system(size: 11))
                             .foregroundStyle(.quaternary)
                         Text(relativeTime)
-                            .font(.system(size: 10))
+                            .font(.system(size: 11))
                             .foregroundStyle(.tertiary)
                         // Character count for text items
                         if case .text(let s) = item.content, s.count > 0 {
                             Text("·")
-                                .font(.system(size: 10))
+                                .font(.system(size: 11))
                                 .foregroundStyle(.quaternary)
                             Text("\(s.count) chars")
-                                .font(.system(size: 10, design: .monospaced))
+                                .font(.system(size: 11, design: .monospaced))
                                 .foregroundStyle(.quaternary)
                         }
                     }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-                // Actions (visible on hover or when pinned)
-                HStack(spacing: 6) {
+                // Actions & Shortcuts
+                HStack(spacing: 12) {
                     if hovered || item.pinned {
                         pinButton
                             .transition(.opacity.combined(with: .scale(scale: 0.7)))
@@ -68,12 +70,28 @@ struct ClipItemRow: View {
                     if hovered {
                         deleteButton
                             .transition(.opacity.combined(with: .scale(scale: 0.7)))
+                    } else if !hovered && !item.pinned {
+                        if index < 9 {
+                            Text("⌘\(index + 1)")
+                                .font(.system(size: 11, weight: .semibold, design: .monospaced))
+                                .foregroundStyle(.tertiary)
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 2)
+                                .background(Capsule().strokeBorder(Color.primary.opacity(0.1)))
+                        } else if isSelected {
+                            Image(systemName: "return")
+                                .font(.system(size: 11, weight: .semibold))
+                                .foregroundStyle(.tertiary)
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 4)
+                                .background(Capsule().strokeBorder(Color.primary.opacity(0.1)))
+                        }
                     }
                 }
                 .animation(.easeOut(duration: 0.12), value: hovered)
             }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 8)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 10)
             .frame(minHeight: rowHeight)
             .background(rowBackground)
             .contentShape(Rectangle())
@@ -140,11 +158,11 @@ struct ClipItemRow: View {
     @ViewBuilder
     private var rowBackground: some View {
         if hovered || isSelected {
-            RoundedRectangle(cornerRadius: 8, style: .continuous)
-                .fill(Color(nsColor: .controlAccentColor).opacity(isSelected ? 0.3 : 0.15))
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .fill(Color.primary.opacity(isSelected ? 0.1 : 0.04))
                 .overlay(
-                    RoundedRectangle(cornerRadius: 8, style: .continuous)
-                        .strokeBorder(Color(nsColor: .controlAccentColor).opacity(isSelected ? 0.8 : 0), lineWidth: 1)
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .strokeBorder(Color.primary.opacity(isSelected ? 0.1 : 0.05), lineWidth: 1)
                 )
         } else {
             Color.clear

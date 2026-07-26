@@ -34,7 +34,7 @@ final class ClipperPopoverController: NSObject, NSPopoverDelegate {
         let panel = makePanel()
 
         let pop = NSPopover()
-        pop.contentSize           = NSSize(width: 340, height: 500)
+        pop.contentSize           = NSSize(width: 380, height: 560)
         pop.behavior              = .transient
         pop.animates              = true
         pop.contentViewController = NSHostingController(rootView: panel)
@@ -57,8 +57,8 @@ final class ClipperPopoverController: NSObject, NSPopoverDelegate {
         NSLog("[Clipper] previousApp: \(previousApp?.localizedName ?? "none")")
 
         // Build a floating panel positioned near the cursor
-        let panelWidth:  CGFloat = 340
-        let panelHeight: CGFloat = 480
+        let panelWidth:  CGFloat = 380
+        let panelHeight: CGFloat = 560
         let offset:      CGFloat = 12
 
         // Find which screen the cursor is on
@@ -75,7 +75,7 @@ final class ClipperPopoverController: NSObject, NSPopoverDelegate {
         origin.y = min(max(origin.y, screen.visibleFrame.minY + 4),
                        screen.visibleFrame.maxY - panelHeight - 4)
 
-        let panel = NSPanel(
+        let panel = ClipperPanelWindow(
             contentRect: NSRect(origin: origin, size: CGSize(width: panelWidth, height: panelHeight)),
             styleMask:   [.borderless, .nonactivatingPanel],
             backing:     .buffered,
@@ -143,4 +143,11 @@ final class ClipperPopoverController: NSObject, NSPopoverDelegate {
     func popoverDidClose(_ notification: Notification) {
         popover = nil
     }
+}
+
+// MARK: - ClipperPanelWindow
+
+final class ClipperPanelWindow: NSPanel {
+    override var canBecomeKey: Bool { true }
+    override var canBecomeMain: Bool { true }
 }
