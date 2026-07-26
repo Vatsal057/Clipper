@@ -1,0 +1,7 @@
+build/
+dist/
+scripts/shots/
+Clipper.xcodeproj/
+.DS_Store
+*.o
+*.d

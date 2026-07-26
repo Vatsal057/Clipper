@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Sandbox ON. CGEventTap paste simulation requires Accessibility permission
+	     which is granted by the user at runtime via AXIsProcessTrustedWithOptions.
+	     No App Groups needed — history stored in Application Support. -->
+	<key>com.apple.security.app-sandbox</key>
+	<true/>
+	<!-- Temporary exception: Clipper needs to write back to the pasteboard
+	     and read from it even while sandboxed. -->
+	<key>com.apple.security.temporary-exception.mach-lookup.global-name</key>
+	<array>
+		<string>com.apple.pasteboard</string>
+	</array>
+</dict>
+</plist>

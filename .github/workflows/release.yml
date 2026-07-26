@@ -1,0 +1,56 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  build-dmg:
+    name: Build & Package DMG
+    runs-on: macos-15   # Xcode 16+, Apple Silicon runner
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install xcodeproj gem
+        run: gem install xcodeproj --no-document
+
+      - name: Build (ad-hoc signed, no notarization)
+        run: |
+          # CI has no Apple Development cert — build unsigned, then ad-hoc sign.
+          ruby scripts/gen_project.rb
+          xcodebuild \
+            -project Clipper.xcodeproj \
+            -scheme Clipper \
+            -configuration Release \
+            -destination 'platform=macOS' \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            build | grep -E "error:|BUILD (SUCCEEDED|FAILED)" || true
+
+          # Ad-hoc sign (no entitlements needed for CI artifact)
+          APP="build/Build/Products/Release/Clipper.app"
+          codesign --force --sign - "$APP"
+          codesign --verify --deep --strict "$APP" && echo "codesign OK"
+
+      - name: Package DMG
+        run: |
+          APP="build/Build/Products/Release/Clipper.app"
+          mkdir -p dist/stage
+          cp -R "$APP" dist/stage/
+          ln -s /Applications dist/stage/Applications
+          hdiutil create \
+            -volname Clipper \
+            -srcfolder dist/stage \
+            -ov -format UDZO \
+            dist/Clipper.dmg > /dev/null
+          echo "DMG size: $(du -sh dist/Clipper.dmg | cut -f1)"
+
+      - name: Upload to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/Clipper.dmg
+          generate_notes: true

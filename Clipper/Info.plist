@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>en</string>
+	<key>CFBundleExecutable</key>
+	<string>Clipper</string>
+	<key>CFBundleIdentifier</key>
+	<string>com.vatsal.clipper</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>Clipper</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.1</string>
+	<key>CFBundleVersion</key>
+	<string>2</string>
+	<!-- Menu-bar only — no Dock icon, no app switcher appearance -->
+	<key>LSUIElement</key>
+	<true/>
+	<key>LSMinimumSystemVersion</key>
+	<string>14.0</string>
+	<key>NSPrincipalClass</key>
+	<string>NSApplication</string>
+	<!-- Privacy descriptions shown in System Settings -->
+	<key>NSAccessibilityUsageDescription</key>
+	<string>Clipper needs Accessibility access to paste clipboard items into other apps.</string>
+	<key>NSAppleEventsUsageDescription</key>
+	<string>Clipper uses Apple Events to activate other apps when pasting.</string>
+</dict>
+</plist>
