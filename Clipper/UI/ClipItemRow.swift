@@ -45,6 +45,15 @@ struct ClipItemRow: View {
                         Text(relativeTime)
                             .font(.system(size: 10))
                             .foregroundStyle(.tertiary)
+                        // Character count for text items
+                        if case .text(let s) = item.content, s.count > 0 {
+                            Text("·")
+                                .font(.system(size: 10))
+                                .foregroundStyle(.quaternary)
+                            Text("\(s.count) chars")
+                                .font(.system(size: 10, design: .monospaced))
+                                .foregroundStyle(.quaternary)
+                        }
                     }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)

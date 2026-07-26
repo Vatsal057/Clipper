@@ -2,7 +2,7 @@ import SwiftUI
 
 // MARK: - ClipperPanel
 
-/// Root SwiftUI view hosted inside the NSPopover.
+/// Root SwiftUI view hosted inside the NSPopover / cursor NSPanel.
 /// 340×500pt, dark popover material, search + scrollable history + footer.
 struct ClipperPanel: View {
 
@@ -11,8 +11,9 @@ struct ClipperPanel: View {
     let onPaste: (ClipboardItem) -> Void
 
     // MARK: Local state
-    @State private var searchText = ""
-    @State private var showClearConfirm = false
+    @State private var searchText        = ""
+    @State private var showClearConfirm  = false
+    @State private var showSettings      = false
 
     // MARK: Design
     private let panelWidth:  CGFloat = 340
@@ -44,10 +45,9 @@ struct ClipperPanel: View {
             // Header
             header
 
-            Divider()
-                .opacity(0.3)
+            Divider().opacity(0.3)
 
-            // List
+            // List or empty state
             if filtered.isEmpty {
                 emptyState
             } else {
@@ -56,8 +56,8 @@ struct ClipperPanel: View {
                         ForEach(filtered) { item in
                             ClipItemRow(
                                 item: item,
-                                onTap: { onPaste(item) },
-                                onDelete: { store.delete(id: item.id) },
+                                onTap:       { onPaste(item) },
+                                onDelete:    { store.delete(id: item.id) },
                                 onTogglePin: { store.togglePin(id: item.id) }
                             )
 
@@ -72,19 +72,20 @@ struct ClipperPanel: View {
                 }
             }
 
-            Divider()
-                .opacity(0.3)
+            Divider().opacity(0.3)
 
             // Footer
             footer
         }
         .frame(width: panelWidth, height: panelHeight)
         .background(
-            // Dark vibrant material matching macOS popover style
             VisualEffectView(material: .popover, blendingMode: .behindWindow)
                 .ignoresSafeArea()
         )
         .preferredColorScheme(.dark)
+        .sheet(isPresented: $showSettings) {
+            SettingsPanel()
+        }
     }
 
     // MARK: - Header
@@ -96,9 +97,25 @@ struct ClipperPanel: View {
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundStyle(.primary)
                 Spacer()
-                Text("\(store.items.count) items")
-                    .font(.system(size: 11))
+                // Item count badge
+                Text("\(store.items.count)")
+                    .font(.system(size: 10, design: .monospaced))
                     .foregroundStyle(.quaternary)
+                    .padding(.horizontal, 5)
+                    .padding(.vertical, 2)
+                    .background(
+                        Capsule()
+                            .fill(Color.primary.opacity(0.06))
+                    )
+
+                // Settings gear
+                Button { showSettings = true } label: {
+                    Image(systemName: "gearshape")
+                        .font(.system(size: 12))
+                        .foregroundStyle(.tertiary)
+                }
+                .buttonStyle(.plain)
+                .help("Settings")
             }
 
             SearchBar(text: $searchText)
@@ -119,6 +136,13 @@ struct ClipperPanel: View {
             Text(searchText.isEmpty ? "Nothing copied yet" : "No results")
                 .font(.system(size: 13))
                 .foregroundStyle(.tertiary)
+            if searchText.isEmpty {
+                Text("Quick templates are pinned below once you copy something.")
+                    .font(.system(size: 10))
+                    .foregroundStyle(.quaternary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 32)
+            }
             Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -128,8 +152,8 @@ struct ClipperPanel: View {
 
     private var footer: some View {
         HStack {
-            Text("⌘⇧C to toggle")
-                .font(.system(size: 10))
+            Text("⌘⇧C")
+                .font(.system(size: 10, design: .monospaced))
                 .foregroundStyle(.quaternary)
 
             Spacer()

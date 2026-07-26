@@ -1,4 +1,5 @@
 import Foundation
+import AppKit
 import Observation
 
 // MARK: - ClipboardStore
@@ -11,8 +12,8 @@ final class ClipboardStore {
     // MARK: Public state (observed by SwiftUI)
     private(set) var items: [ClipboardItem] = []
 
-    // MARK: Constants
-    static let maxItems = 100
+    // Max items read from preferences each time trim() is called
+    private var maxItems: Int { ClipperPreferences.shared.maxHistoryCount }
 
     // MARK: Persistence
     private let persistURL: URL = {
@@ -27,6 +28,7 @@ final class ClipboardStore {
     // MARK: Init
     init() {
         loadPinned()
+        seedTemplatesIfNeeded()
     }
 
     // MARK: - Mutations
@@ -44,6 +46,11 @@ final class ClipboardStore {
         items.insert(item, at: 0)
         trim()
         savePinned()
+
+        // Optional copy sound
+        if ClipperPreferences.shared.soundOnCopy {
+            NSSound(named: "Pop")?.play()
+        }
     }
 
     /// Toggle pin state for the item with the given id.
@@ -65,18 +72,36 @@ final class ClipboardStore {
         savePinned()
     }
 
+    // MARK: - Quick Templates seeding
+
+    /// On very first launch, seed the store with pinned quick templates.
+    private func seedTemplatesIfNeeded() {
+        let key = "templatesSeeded_v2"
+        guard !UserDefaults.standard.bool(forKey: key) else { return }
+        UserDefaults.standard.set(true, forKey: key)
+
+        for tmpl in QuickTemplates.defaults.reversed() {
+            let item = ClipboardItem(
+                content:    .text(tmpl.content),
+                appBundleID: nil,
+                appName:    "Quick Template",
+                appIconData: nil,
+                pinned:     true
+            )
+            items.insert(item, at: 0)
+        }
+        savePinned()
+    }
+
     // MARK: - Private helpers
 
     private func trim() {
-        guard items.count > Self.maxItems else { return }
-        // Collect unpinned indices from the back; remove until under cap.
-        // We iterate from highest index to lowest so earlier removes don't
-        // invalidate later indices.
+        guard items.count > maxItems else { return }
         var unpinnedIndices: [Int] = items.indices
             .filter { !items[$0].pinned }
             .reversed()
         var cursor = 0
-        while items.count > Self.maxItems, cursor < unpinnedIndices.count {
+        while items.count > maxItems, cursor < unpinnedIndices.count {
             items.remove(at: unpinnedIndices[cursor])
             cursor += 1
         }
@@ -99,7 +124,7 @@ final class ClipboardStore {
 
     private func loadPinned() {
         guard
-            let data = try? Data(contentsOf: persistURL),
+            let data  = try? Data(contentsOf: persistURL),
             let pinned = try? JSONDecoder().decode([ClipboardItem].self, from: data)
         else { return }
         items = pinned

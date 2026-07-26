@@ -39,6 +39,7 @@ final class PasteEngine {
         pb.clearContents()
         switch item.content {
         case .text(let s):
+            // Plain-text mode: write only the string type so apps can't pull RTF
             pb.setString(s, forType: .string)
         case .image(let data):
             pb.setData(data, forType: .png)
