@@ -46,9 +46,15 @@ final class ClipperPopoverController: NSObject, NSPopoverDelegate {
     // MARK: - Cursor-positioned toggle (global hotkey)
 
     func toggleAtCursor(mousePosition: NSPoint) {
-        if isShown { close(); return }
+        NSLog("[Clipper] toggleAtCursor called with position: \(mousePosition)")
+        if isShown { 
+            NSLog("[Clipper] isShown is true, closing.")
+            close()
+            return 
+        }
 
         previousApp = NSWorkspace.shared.frontmostApplication
+        NSLog("[Clipper] previousApp: \(previousApp?.localizedName ?? "none")")
 
         // Build a floating panel positioned near the cursor
         let panelWidth:  CGFloat = 340
@@ -75,7 +81,7 @@ final class ClipperPopoverController: NSObject, NSPopoverDelegate {
             backing:     .buffered,
             defer:       false
         )
-        panel.isReleasedWhenClosed = true
+        panel.isReleasedWhenClosed = false
         panel.level                = .popUpMenu
         panel.backgroundColor      = .clear
         panel.isOpaque             = false
@@ -92,7 +98,9 @@ final class ClipperPopoverController: NSObject, NSPopoverDelegate {
             self?.closeCursorPanel()
         }
 
+        NSLog("[Clipper] Displaying panel...")
         panel.orderFrontRegardless()
+        panel.makeKey()
         cursorPanel = panel
     }
 

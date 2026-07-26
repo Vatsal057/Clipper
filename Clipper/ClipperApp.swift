@@ -98,6 +98,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             return Unmanaged.passRetained(event)
         }
 
+        NSLog("[Clipper] handleKeyEvent intercepted ⌘⇧C!")
+
         // Capture mouse position before dispatching to main
         let mousePos = NSEvent.mouseLocation
 
