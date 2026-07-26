@@ -43,22 +43,22 @@ struct ClipItemRow: View {
                         if let name = item.appName {
                             Text(name)
                                 .font(.system(size: 11, weight: .medium))
-                                .foregroundStyle(isSelected ? .white.opacity(0.9) : .tertiary)
+                                .foregroundStyle(isSelected ? Color.white.opacity(0.9) : Color(nsColor: .tertiaryLabelColor))
                         }
                         Text("·")
                             .font(.system(size: 11))
-                            .foregroundStyle(isSelected ? .white.opacity(0.6) : .quaternary)
+                            .foregroundStyle(isSelected ? Color.white.opacity(0.6) : Color(nsColor: .quaternaryLabelColor))
                         Text(relativeTime)
                             .font(.system(size: 11))
-                            .foregroundStyle(isSelected ? .white.opacity(0.9) : .tertiary)
+                            .foregroundStyle(isSelected ? Color.white.opacity(0.9) : Color(nsColor: .tertiaryLabelColor))
                         // Character count for text items
                         if case .text(let s) = item.content, s.count > 0 {
                             Text("·")
                                 .font(.system(size: 11))
-                                .foregroundStyle(isSelected ? .white.opacity(0.6) : .quaternary)
+                                .foregroundStyle(isSelected ? Color.white.opacity(0.6) : Color(nsColor: .quaternaryLabelColor))
                             Text("\(s.count) chars")
                                 .font(.system(size: 11, design: .monospaced))
-                                .foregroundStyle(isSelected ? .white.opacity(0.6) : .quaternary)
+                                .foregroundStyle(isSelected ? Color.white.opacity(0.6) : Color(nsColor: .quaternaryLabelColor))
                         }
                     }
                 }
@@ -77,7 +77,7 @@ struct ClipItemRow: View {
                         if index < 9 {
                             Text("⌘\(index + 1)")
                                 .font(.system(size: 11, weight: .semibold, design: .monospaced))
-                                .foregroundStyle(isSelected ? .white : .tertiary)
+                                .foregroundStyle(isSelected ? Color.white : Color(nsColor: .tertiaryLabelColor))
                                 .padding(.horizontal, 6)
                                 .padding(.vertical, 2)
                                 .background(Capsule().strokeBorder(isSelected ? Color.white.opacity(0.3) : Color.primary.opacity(0.1)))
@@ -152,7 +152,7 @@ struct ClipItemRow: View {
         Button(action: onDelete) {
             Image(systemName: "trash")
                 .font(.system(size: 11))
-                .foregroundStyle(isSelected ? .white.opacity(0.8) : .tertiary)
+                .foregroundStyle(isSelected ? Color.white.opacity(0.8) : Color(nsColor: .tertiaryLabelColor))
         }
         .buttonStyle(.plain)
         .help("Delete")
